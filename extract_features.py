@@ -2,6 +2,7 @@ from data_preprocessing import get_past_matches, calculate_team_stats
 from feature_engineering import head_to_head_stats
 from team_mapping import TEAM_NAME_MAPPING
 from data_preprocessing import get_recent_form
+from data_preprocessing import get_recent_form, calculate_goal_diff
 import pandas as pd
 
 def extract_features(df, home_team, away_team, match_date, le_team):
@@ -16,8 +17,11 @@ def extract_features(df, home_team, away_team, match_date, le_team):
 
     h2h = head_to_head_stats(df, home_team, away_team, match_date)
     
-    recent_home = get_recent_form(df, home_team, match_date)
-    recent_away = get_recent_form(df, away_team, match_date)
+    home_recent_form = get_recent_form(df, home_team, match_date)
+    away_recent_form = get_recent_form(df, away_team, match_date)
+
+    home_goal_diff = calculate_goal_diff(df, home_team, match_date)
+    away_goal_diff = calculate_goal_diff(df, away_team, match_date)
 
     home_team_enc = le_team.transform([home_team])[0]
     away_team_enc = le_team.transform([away_team])[0]
@@ -36,16 +40,8 @@ def extract_features(df, home_team, away_team, match_date, le_team):
         'away_goals_for_last3y': away_stats['goals_for'],
         'away_goals_against_last3y': away_stats['goals_against'],
         'home_h2h_winrate': h2h,
-        
-        'recent_home_wins': recent_home['recent_wins'],
-        'recent_home_draws': recent_home['recent_draws'],
-        'recent_home_losses': recent_home['recent_losses'],
-        'recent_home_goals_for': recent_home['recent_goals_for'],
-        'recent_home_goals_against': recent_home['recent_goals_against'],
-
-        'recent_away_wins': recent_away['recent_wins'],
-        'recent_away_draws': recent_away['recent_draws'],
-        'recent_away_losses': recent_away['recent_losses'],
-        'recent_away_goals_for': recent_away['recent_goals_for'],
-        'recent_away_goals_against': recent_away['recent_goals_against'],
+        'home_recent_form': home_recent_form,
+        'away_recent_form': away_recent_form,
+        'home_goal_diff': home_goal_diff,
+        'away_goal_diff': away_goal_diff,
     }])

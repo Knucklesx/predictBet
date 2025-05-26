@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 import joblib
 from sklearn.metrics import classification_report
+import xgboost as xgb
 
 def train_and_evaluate(train_file='train.csv', val_file='val.csv', test_file='test.csv', model_file='model.pkl'):
     train = pd.read_csv(train_file)
@@ -13,7 +14,16 @@ def train_and_evaluate(train_file='train.csv', val_file='val.csv', test_file='te
     X_val, y_val = val[features], val['result_enc']
     X_test, y_test = test[features], test['result_enc']
 
-    clf = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
+    # clf = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
+    clf = xgb.XGBClassifier(
+    n_estimators=100,
+    learning_rate=0.1,
+    max_depth=5,
+    random_state=42,
+    use_label_encoder=False,
+    eval_metric='mlogloss'
+    )
+
     clf.fit(X_train, y_train)
 
     print("\n=== Avaliação na Validação ===")

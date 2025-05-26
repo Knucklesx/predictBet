@@ -88,3 +88,36 @@ def get_recent_form(df, team, date, n_games=5):
         'recent_goals_for': goals_for,
         'recent_goals_against': goals_against
     })
+
+
+# Calculates recent form as win ratio in last n_games
+def get_recent_form(df, team, date, n_games=5):
+    mask = ((df['Date'] < date) & ((df['Home'] == team) | (df['Away'] == team)))
+    recent_games = df.loc[mask].sort_values('Date', ascending=False).head(n_games)
+    
+    if recent_games.empty:
+        return 0.5  # neutral form if no data
+
+    wins = 0
+    for _, match in recent_games.iterrows():
+        if match['Home'] == team and match['Res'] == 'H':
+            wins += 1
+        elif match['Away'] == team and match['Res'] == 'A':
+            wins += 1
+    return wins / n_games
+
+# Calculates goal difference over last n_games
+def calculate_goal_diff(df, team, date, n_games=5):
+    mask = ((df['Date'] < date) & ((df['Home'] == team) | (df['Away'] == team)))
+    recent_games = df.loc[mask].sort_values('Date', ascending=False).head(n_games)
+
+    if recent_games.empty:
+        return 0  # neutral if no data
+
+    goal_diff = 0
+    for _, match in recent_games.iterrows():
+        if match['Home'] == team:
+            goal_diff += match['HG'] - match['AG']
+        elif match['Away'] == team:
+            goal_diff += match['AG'] - match['HG']
+    return goal_diff
