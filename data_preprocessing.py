@@ -50,3 +50,41 @@ def calculate_team_stats(past_matches, team):
         'goals_for': goals_for,
         'goals_against': goals_against
     })
+    
+def get_recent_form(df, team, date, n_games=5):
+    mask = ((df['Date'] < date) &
+            ((df['Home'] == team) | (df['Away'] == team)))
+    recent_games = df.loc[mask].sort_values(by='Date', ascending=False).head(n_games)
+
+    wins = draws = losses = goals_for = goals_against = 0
+
+    for _, match in recent_games.iterrows():
+        is_home = match['Home'] == team
+        result = match['Res']
+
+        if is_home:
+            goals_for += match['HG']
+            goals_against += match['AG']
+            if result == 'H':
+                wins += 1
+            elif result == 'D':
+                draws += 1
+            else:
+                losses += 1
+        else:
+            goals_for += match['AG']
+            goals_against += match['HG']
+            if result == 'A':
+                wins += 1
+            elif result == 'D':
+                draws += 1
+            else:
+                losses += 1
+
+    return pd.Series({
+        'recent_wins': wins,
+        'recent_draws': draws,
+        'recent_losses': losses,
+        'recent_goals_for': goals_for,
+        'recent_goals_against': goals_against
+    })
